@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Night Shift</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="view"></canvas>
+
+    <!-- In-game HUD -->
+    <div id="hud" class="hidden">
+      <div class="hud-tl">
+        <div id="level-name"></div>
+        <div id="objective"></div>
+      </div>
+      <div class="hud-tc">
+        <div id="wave"></div>
+        <div id="enemies-left"></div>
+        <div id="boss" class="hidden">
+          <div id="boss-name">THE CREATURE</div>
+          <div class="bar"><div id="boss-fill"></div></div>
+        </div>
+      </div>
+      <div class="hud-tr">
+        <div id="score">0</div>
+        <div id="combo"></div>
+      </div>
+      <div class="hud-bl">
+        <div class="hp-label">HEALTH <span id="hp-text">100</span></div>
+        <div class="bar hp"><div id="hp-fill"></div></div>
+        <div id="roll-ready">ROLL [SPACE]</div>
+      </div>
+      <div class="hud-br">
+        <div id="slots"></div>
+        <div id="weapon-name"></div>
+        <div id="ammo"><span id="mag">0</span><span class="sep">/</span><span id="reserve">0</span></div>
+        <div id="reload-hint" class="hidden">RELOADING</div>
+      </div>
+      <div id="crosshair"><i class="n"></i><i class="s"></i><i class="e"></i><i class="w"></i><b></b></div>
+      <div id="hitmarker"></div>
+      <div id="dmg-dirs"></div>
+      <div id="vignette"></div>
+      <div id="lowhp"></div>
+      <div id="center-msg"><h1></h1><p></p></div>
+      <div id="toasts"></div>
+      <div id="exit-marker" class="hidden"><span>EXIT</span><em></em></div>
+    </div>
+
+    <!-- Menus -->
+    <div id="menu" class="screen">
+      <div class="title-block">
+        <h1 class="game-title">NIGHT <span>SHIFT</span></h1>
+        <p class="tagline">One cop. One night. Five hells.</p>
+      </div>
+      <div class="menu-buttons">
+        <button data-action="continue" id="btn-continue">Continue</button>
+        <button data-action="new">New Game</button>
+        <button data-action="levels">Level Select</button>
+        <button data-action="controls">Controls</button>
+        <button data-action="settings">Settings</button>
+      </div>
+      <p class="credits">Built with three.js</p>
+    </div>
+
+    <div id="levels" class="screen hidden">
+      <h2>Level Select</h2>
+      <div id="level-cards"></div>
+      <button data-action="back">Back</button>
+    </div>
+
+    <div id="controls" class="screen hidden">
+      <h2>Controls</h2>
+      <table class="keys">
+        <tr><td>W A S D</td><td>Move</td></tr>
+        <tr><td>Mouse</td><td>Look / aim</td></tr>
+        <tr><td>Left click</td><td>Fire</td></tr>
+        <tr><td>Right click</td><td>Aim down sights</td></tr>
+        <tr><td>Shift</td><td>Sprint</td></tr>
+        <tr><td>Space</td><td>Dodge roll (invulnerable)</td></tr>
+        <tr><td>F / V</td><td>Bat melee</td></tr>
+        <tr><td>R</td><td>Reload</td></tr>
+        <tr><td>1 2 3 / wheel / Q</td><td>Switch weapon</td></tr>
+        <tr><td>Esc</td><td>Pause</td></tr>
+      </table>
+      <p class="hint">Headshots deal double damage. Kill quickly to build a combo multiplier.</p>
+      <button data-action="back">Back</button>
+    </div>
+
+    <div id="settings" class="screen hidden">
+      <h2>Settings</h2>
+      <label>Mouse sensitivity <input type="range" id="set-sens" min="0.2" max="3" step="0.05" /><output id="out-sens"></output></label>
+      <label>Volume <input type="range" id="set-vol" min="0" max="1" step="0.05" /><output id="out-vol"></output></label>
+      <label>Difficulty
+        <select id="set-diff">
+          <option value="easy">Rookie</option>
+          <option value="normal">Officer</option>
+          <option value="hard">Veteran</option>
+        </select>
+      </label>
+      <label>Retro pixels <input type="checkbox" id="set-retro" /></label>
+      <button data-action="back">Back</button>
+    </div>
+
+    <div id="loading" class="screen hidden">
+      <div class="brief">
+        <div class="brief-num" id="load-num"></div>
+        <h2 id="load-title"></h2>
+        <h3 id="load-sub"></h3>
+        <p id="load-brief"></p>
+        <div class="bar load"><div id="load-fill"></div></div>
+        <button id="btn-start" class="hidden">Start</button>
+        <p class="hint" id="load-hint">Loading…</p>
+      </div>
+    </div>
+
+    <div id="pause" class="screen hidden overlay">
+      <h2>Paused</h2>
+      <div class="menu-buttons">
+        <button data-action="resume">Resume</button>
+        <button data-action="restart">Restart Level</button>
+        <button data-action="settings">Settings</button>
+        <button data-action="quit">Quit to Menu</button>
+      </div>
+    </div>
+
+    <div id="complete" class="screen hidden overlay">
+      <h2 id="complete-title">Level Complete</h2>
+      <div id="complete-stats" class="stats"></div>
+      <div class="menu-buttons">
+        <button data-action="next" id="btn-next">Next Level</button>
+        <button data-action="restart">Replay</button>
+        <button data-action="quit">Menu</button>
+      </div>
+    </div>
+
+    <div id="gameover" class="screen hidden overlay red">
+      <h2>You Died</h2>
+      <p id="gameover-tip" class="hint"></p>
+      <div class="menu-buttons">
+        <button data-action="restart">Retry</button>
+        <button data-action="quit">Menu</button>
+      </div>
+    </div>
+
+    <div id="victory" class="screen hidden">
+      <h1 class="game-title">DAWN <span>BREAKS</span></h1>
+      <p class="tagline">The Creature is dead. Your shift is over.</p>
+      <div id="victory-stats" class="stats"></div>
+      <div class="menu-buttons">
+        <button data-action="quit">Main Menu</button>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
