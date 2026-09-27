@@ -24,11 +24,15 @@ function writeSave() {
   }
 }
 
+// v2 made sharp graphics the default; older saves stored the old retro default, so reset it once.
+if ((save.settings.version ?? 1) < 2) delete save.settings.retro;
+const settings = { sens: 1, vol: 0.7, diff: 'normal', retro: false, aa: false, ...save.settings, version: 2 };
+
 const canvas = $('view');
 const input = new Input(canvas);
 const audio = new Audio();
 const hud = new Hud();
-const game = new Game(canvas, input, audio, hud);
+const game = new Game(canvas, input, audio, hud, { antialias: settings.aa });
 window.__game = game; // handy for debugging from the console
 const touch = new TouchControls(input, { onPause: () => pause() });
 
@@ -42,7 +46,6 @@ function setTouchMode(on) {
 }
 addEventListener('touchstart', () => { if (!touchMode) setTouchMode(true); }, { passive: true });
 
-const settings = { sens: 1, vol: 0.7, diff: 'normal', retro: true, ...save.settings };
 function applySettings() {
   input.sensitivity = settings.sens;
   audio.setVolume(settings.vol);
@@ -323,6 +326,14 @@ $('set-diff').value = settings.diff;
 $('set-diff').addEventListener('change', (e) => { settings.diff = e.target.value; applySettings(); });
 $('set-retro').checked = settings.retro;
 $('set-retro').addEventListener('change', (e) => { settings.retro = e.target.checked; applySettings(); });
+$('set-aa').checked = settings.aa;
+$('set-aa').addEventListener('change', (e) => {
+  settings.aa = e.target.checked;
+  applySettings();
+  // Anti-aliasing is chosen when the WebGL context is created; reload unless a level is in progress.
+  if (!game.player) location.reload();
+  else hud.toast('ANTI-ALIASING APPLIES AFTER RELOAD', '#9ab');
+});
 
 // Dev shortcuts: ?level=N starts that level directly; &auto=1 skips the Start button; &god=1.
 const params = new URLSearchParams(location.search);

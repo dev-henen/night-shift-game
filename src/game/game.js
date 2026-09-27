@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { World, rayCylinder, raySphere } from '../engine/world.js';
 import { Effects } from '../engine/effects.js';
-import { loadModel, whenIdle, onProgress } from '../engine/assets.js';
+import { loadModel, whenIdle, onProgress, setTextureQuality } from '../engine/assets.js';
 import { loadCharacter, makeCharacter } from './characters.js';
 import { WEAPONS, loadWeapon, loadBat } from './weapons.js';
 import { Player } from './player.js';
@@ -19,12 +19,18 @@ export const DIFFICULTY = {
 const MAX_DT = 1 / 30;
 
 export class Game {
-  constructor(canvas, input, audio, hud) {
+  constructor(canvas, input, audio, hud, { antialias = false } = {}) {
     this.canvas = canvas;
     this.input = input;
     this.audio = audio;
     this.hud = hud;
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+    // MSAA is fixed when the WebGL context is created, so the setting applies on page load.
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias, powerPreference: 'high-performance' });
+    // Dynamic resolution: render scale adapts to hold ~60 FPS (see adaptResolution).
+    this.resScale = Math.min(devicePixelRatio, 2);
+    this.resTimer = 0;
+    this.resFrames = 0;
+    setTextureQuality({ anisotropy: Math.min(8, this.renderer.capabilities.getMaxAnisotropy()) });
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -41,7 +47,7 @@ export class Game {
     this.world = new World();
     this.state = 'menu';
     this.difficulty = DIFFICULTY.normal;
-    this.retro = true;
+    this.retro = false;
     this.enemies = [];
     this.projectiles = [];
     this.pickups = [];
@@ -54,8 +60,10 @@ export class Game {
     this.renderer.setAnimationLoop(() => this.frame());
   }
 
+  /** Retro: half-resolution render with hard pixels on characters/guns (PS1 look). */
   setRetro(on) {
     this.retro = on;
+    setTextureQuality({ retro: on });
     this.canvas.classList.toggle('retro', on);
     this.resize();
   }
@@ -63,7 +71,7 @@ export class Game {
   resize() {
     const w = innerWidth;
     const h = innerHeight;
-    this.renderer.setPixelRatio(this.retro ? 0.5 : Math.min(devicePixelRatio, 1.5));
+    this.renderer.setPixelRatio(this.retro ? 0.5 : this.resScale);
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
@@ -414,6 +422,25 @@ export class Game {
     this.onStateChange?.('victory');
   }
 
+  /** Every second, nudge the render scale down if frames are slow, back up when there's headroom. */
+  adaptResolution(raw) {
+    if (this.retro) return;
+    this.resTimer += raw;
+    this.resFrames++;
+    if (this.resTimer < 1) return;
+    const fps = this.resFrames / this.resTimer;
+    this.resTimer = 0;
+    this.resFrames = 0;
+    const max = Math.min(devicePixelRatio, 2);
+    let next = this.resScale;
+    if (fps < 50) next = Math.max(0.55, this.resScale - (fps < 35 ? 0.15 : 0.08));
+    else if (fps > 57) next = Math.min(max, this.resScale + 0.05);
+    if (Math.abs(next - this.resScale) > 0.001) {
+      this.resScale = next;
+      this.resize();
+    }
+  }
+
   // --- main loop ---------------------------------------------------------------------------------
 
   frame() {
@@ -422,6 +449,7 @@ export class Game {
     const dt = Math.min(MAX_DT, raw);
     // Smoothed FPS, shown nowhere but useful from the console / tests.
     this.fpsSample = Math.round(THREE.MathUtils.lerp(this.fpsSample ?? 60, 1 / Math.max(raw, 1e-3), 0.05));
+    if (this.state === 'playing') this.adaptResolution(raw);
     if (this.state === 'playing') this.update(dt);
     else if (this.player && this.state !== 'loading') this.player.updateCamera(0);
     if (this.state !== 'loading' && this.player) this.render();

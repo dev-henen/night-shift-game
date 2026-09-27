@@ -55,6 +55,13 @@ Progress, best scores and settings are saved in `localStorage`.
 
 Each level runs three waves (the last one ends with the boss); clear them, then reach the exit beacon.
 
+## Graphics settings
+
+- **Default:** smooth texture filtering and dynamic resolution. The render scale adapts every
+  second (0.55x to your screen's full resolution) to hold about 60 FPS.
+- **Retro pixels:** half-resolution rendering with hard-edged character/gun textures (PS1 look, fastest).
+- **Anti-aliasing:** MSAA; costly on integrated GPUs; takes effect after a reload.
+
 ## How it works
 
 - `src/engine/` — asset loading (`assets.js`), input, synthesized WebAudio (`audio.js`; the packs
@@ -67,8 +74,8 @@ Each level runs three waves (the last one ends with the boss); clear them, then 
 
 ## Assets
 
-`public/assets/` holds the subset of the packs the game uses (≈39 MB), with textures downscaled
-to 512 px and normal/ORM maps stripped. To regenerate it, extract each archive from
+`public/assets/` holds the subset of the packs the game uses (≈50 MB), with the city/nature textures
+downscaled from 2048 to 1024 px and normal/ORM maps stripped. To regenerate it, extract each archive from
 `Documents/game-assets` into a folder named after the archive, then:
 
 ```sh

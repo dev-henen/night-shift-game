@@ -46,18 +46,18 @@ for (const [name, [fbx, png]] of Object.entries(characters)) {
   copy(fbx, `characters/${name}.fbx`);
   await texture(png, `characters/${name}.png`);
 }
-await texture(src('Characters/Characters/Killer/Machete.png'), 'characters/machete.png', 256);
+await texture(src('Characters/Characters/Killer/Machete.png'), 'characters/machete.png', 512);
 
 // --- Weapons -----------------------------------------------------------------------------------
 const GUNS = src('PSXMiscGuns/PSXMiscGuns');
 copy(path.join(GUNS, '1911/1911.fbx'), 'weapons/pistol.fbx');
-await texture(path.join(GUNS, '1911/1911_Texture.png'), 'weapons/pistol.png', 256);
+await texture(path.join(GUNS, '1911/1911_Texture.png'), 'weapons/pistol.png', 512);
 copy(path.join(GUNS, 'TaticalShotgun/TacticalShotgun.fbx'), 'weapons/shotgun.fbx');
-await texture(path.join(GUNS, 'TaticalShotgun/Textures/Tac_Shotgun_Text_240_Alpha.png'), 'weapons/shotgun.png', 256);
+await texture(path.join(GUNS, 'TaticalShotgun/Textures/Tac_Shotgun_Text_240_Alpha.png'), 'weapons/shotgun.png', 512);
 copy(path.join(GUNS, 'tactical rifle/Tactical_Rifle.fbx'), 'weapons/rifle.fbx');
-await texture(path.join(GUNS, 'tactical rifle/Textures/Tac_M14_Text.png'), 'weapons/rifle.png', 256);
+await texture(path.join(GUNS, 'tactical rifle/Textures/Tac_M14_Text.png'), 'weapons/rifle.png', 512);
 copy(path.join(GUNS, 'Makarov/Makarov.fbx'), 'weapons/makarov.fbx');
-await texture(path.join(GUNS, 'Makarov/Texture/Mak_Textiure_240.png'), 'weapons/makarov.png', 256);
+await texture(path.join(GUNS, 'Makarov/Texture/Mak_Textiure_240.png'), 'weapons/makarov.png', 512);
 copy(src('RandomObjects/RandomObjects/bat/bat_low.glb'), 'weapons/bat.glb');
 copy(src('RandomObjects/RandomObjects/case/case_low.glb'), 'props/medkit.glb');
 
@@ -92,7 +92,7 @@ await gltfKit(src('Downtown City MegaKit[Standard]/Exports/glTF (Godot)'), [
   'Street_4Lane', 'Street_2Lane', 'Street_4WayIntersection', 'Street_TIntersection', 'Street_Asphalt_9x9',
   'Sidewalk_Straight_3m', 'Sidewalk_Corner_Round_3m', 'Sidewalk_Planter', 'Floor_4x4',
   'Prop_Bollard', 'Prop_Planter_Single', 'Prop_ManholeCover', 'Prop_ACUnit', 'Prop_Drain',
-], 'city', 512);
+], 'city', 1024);
 
 await gltfKit(src('Stylized Nature MegaKit[Standard]/glTF'), [
   'CommonTree_1', 'CommonTree_2', 'CommonTree_3', 'CommonTree_4', 'CommonTree_5',
@@ -104,7 +104,7 @@ await gltfKit(src('Stylized Nature MegaKit[Standard]/glTF'), [
   'Grass_Common_Tall', 'Grass_Common_Short', 'Grass_Wispy_Tall',
   'Flower_3_Group', 'Flower_4_Group', 'Mushroom_Common', 'Mushroom_Laetiporus',
   'RockPath_Round_Wide', 'RockPath_Square_Wide',
-], 'nature', 512);
+], 'nature', 1024);
 
 // --- PSX house interior kit (GLB, embedded textures) --------------------------------------------
 const HOUSE = src('PSX modular house interior pack');

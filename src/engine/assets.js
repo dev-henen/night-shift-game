@@ -35,16 +35,43 @@ export async function whenIdle() {
 const models = new Map();
 const textures = new Map();
 
+// Texture quality. "Pixelated" textures (characters, guns) switch between hard PS1-style
+// pixels and smooth filtering with the Retro setting; every texture gets anisotropic filtering.
+const allTextures = new Set();
+const retroTextures = new Set();
+const quality = { retro: false, anisotropy: 1 };
+
+function applyQuality(tex) {
+  tex.anisotropy = quality.anisotropy;
+  if (retroTextures.has(tex)) {
+    tex.magFilter = quality.retro ? THREE.NearestFilter : THREE.LinearFilter;
+    tex.minFilter = quality.retro ? THREE.NearestMipmapLinearFilter : THREE.LinearMipmapLinearFilter;
+  }
+  // Textures still downloading get uploaded by their loader; only re-upload ready ones.
+  if (tex.image) tex.needsUpdate = true;
+}
+
+function registerTexture(tex, pixelated) {
+  if (!tex || allTextures.has(tex)) return;
+  allTextures.add(tex);
+  if (pixelated) retroTextures.add(tex);
+  applyQuality(tex);
+}
+
+/** Updates filtering on every loaded texture (and future ones). */
+export function setTextureQuality({ retro, anisotropy }) {
+  if (retro !== undefined) quality.retro = retro;
+  if (anisotropy !== undefined) quality.anisotropy = anisotropy;
+  for (const tex of allTextures) if (tex.image) applyQuality(tex);
+}
+
 export function loadTexture(path, { pixelated = false, repeat } = {}) {
   const key = `${path}|${pixelated}|${repeat}`;
   if (!textures.has(key)) {
     let tex;
     track(new Promise((resolve) => { tex = textureLoader.load(BASE + path, resolve, undefined, resolve); }));
     tex.colorSpace = THREE.SRGBColorSpace;
-    if (pixelated) {
-      tex.magFilter = THREE.NearestFilter;
-      tex.minFilter = THREE.NearestMipmapLinearFilter;
-    }
+    registerTexture(tex, pixelated);
     if (repeat) {
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
       tex.repeat.set(repeat, repeat);
@@ -82,6 +109,7 @@ function prepare(root, { texture, textureFor, shadows = true, pixelated = false,
     const conv = (m) => {
       const map = textureFor?.(o, m) ?? texture;
       const tex = map ? loadTexture(map, { pixelated }) : undefined;
+      if (!tex) registerTexture(m.map, false); // textures embedded in glTF/GLB files
       const key = `${m.uuid}|${map}`;
       if (!converted.has(key)) converted.set(key, toLambert(m, tex, { fbx, alphaTest, vertexColors, doubleSide, tint }));
       return converted.get(key);
