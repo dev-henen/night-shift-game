@@ -11,25 +11,34 @@ an office tower, brutes in a dark house, and finally the Creature in the town sq
 
 ```sh
 npm install
-npm run dev        # http://localhost:5173
+npm run dev        # serves on all interfaces: http://localhost:5173 and http://<your-LAN-IP>:5173
 npm run build      # static build in dist/ (relative paths, host anywhere)
-npm run preview
+npm run preview    # serves dist/ on the LAN at port 4173
 ```
+
+Phones and tablets on the same network can open the Network URL Vite prints. On Windows, allow
+Node.js through the firewall for private networks if the page doesn't load.
 
 ## Controls
 
-| Input | Action |
-| --- | --- |
-| W A S D | Move |
-| Mouse | Look / aim |
-| Left click | Fire |
-| Right click | Aim down sights (tighter spread, zoom) |
-| Shift | Sprint |
-| Space | Dodge roll (brief invulnerability) |
-| F / V | Bat melee (staggers most enemies) |
-| R | Reload |
-| 1 2 3 / wheel / Q | Switch weapon / last weapon |
-| Esc | Pause |
+Mouse & keyboard, keyboard only, and touchscreen all work; the in-game Controls screen lists everything.
+
+| Action | Mouse & keyboard | Keyboard only | Touch |
+| --- | --- | --- | --- |
+| Move | W A S D | ↑ ↓ (or W S), A D strafe | Left-thumb joystick |
+| Look | Mouse | ← → turn, I K / PgUp PgDn tilt | Drag on the right half |
+| Fire | Left click | J / Enter | FIRE (drag it to aim while firing) |
+| Aim down sights | Right click | L / Right Shift | AIM (toggle) |
+| Sprint | Left Shift | Left Shift | Push the joystick past its ring |
+| Dodge roll | Space | Space | ROLL |
+| Bat melee | F / V | F / V | BAT |
+| Reload | R | R | R |
+| Weapons | 1 2 3, wheel, Q last | Tab / E next, 1 2 3, Q | SWAP |
+| Pause | Esc / P | Esc / P | II |
+
+Menus can be driven with the arrow keys and Enter. Keyboard and touch players get aim assist
+(the camera eases onto the nearest visible enemy near the crosshair). Touch controls appear
+automatically on touch devices (or with `?touch=1`) and hide once a mouse is captured.
 
 Headshots deal 2.2x damage. Kills within 3 seconds of each other build a combo multiplier.
 Progress, best scores and settings are saved in `localStorage`.
@@ -76,5 +85,6 @@ With `npm run dev` running:
 - `?level=N&auto=1&god=1` — jump straight into a level (skip the Start button, invulnerable).
 - `node dev/run.mjs <level>` — plays a level to completion with an auto-aim bot in headless Chromium.
 - `node dev/play.mjs <level> <out>` — runs a level for a few seconds and saves screenshots.
+- `node dev/input-test.mjs <out>` — checks keyboard-only and touchscreen controls (emulated phone).
 - `dev/sandbox.html?pose=walk&chars=player,killer` — character pose viewer;
   `dev/kitview.html?m=city/Street_4Lane.gltf` — kit piece viewer.

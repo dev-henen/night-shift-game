@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#07080b" />
   <title>Night Shift</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -76,18 +79,49 @@
 
     <div id="controls" class="screen hidden">
       <h2>Controls</h2>
-      <table class="keys">
-        <tr><td>W A S D</td><td>Move</td></tr>
-        <tr><td>Mouse</td><td>Look / aim</td></tr>
-        <tr><td>Left click</td><td>Fire</td></tr>
-        <tr><td>Right click</td><td>Aim down sights</td></tr>
-        <tr><td>Shift</td><td>Sprint</td></tr>
-        <tr><td>Space</td><td>Dodge roll (invulnerable)</td></tr>
-        <tr><td>F / V</td><td>Bat melee</td></tr>
-        <tr><td>R</td><td>Reload</td></tr>
-        <tr><td>1 2 3 / wheel / Q</td><td>Switch weapon</td></tr>
-        <tr><td>Esc</td><td>Pause</td></tr>
-      </table>
+      <div class="controls-cols">
+        <div>
+          <h3>Mouse &amp; keyboard</h3>
+          <table class="keys">
+            <tr><td>W A S D</td><td>Move</td></tr>
+            <tr><td>Mouse</td><td>Look / aim</td></tr>
+            <tr><td>Left click</td><td>Fire</td></tr>
+            <tr><td>Right click</td><td>Aim down sights</td></tr>
+            <tr><td>Shift</td><td>Sprint</td></tr>
+            <tr><td>Space</td><td>Dodge roll (invulnerable)</td></tr>
+            <tr><td>F / V</td><td>Bat melee</td></tr>
+            <tr><td>R</td><td>Reload</td></tr>
+            <tr><td>1 2 3 / wheel</td><td>Switch weapon</td></tr>
+            <tr><td>Q</td><td>Last weapon</td></tr>
+            <tr><td>Esc / P</td><td>Pause</td></tr>
+          </table>
+        </div>
+        <div>
+          <h3>Keyboard only</h3>
+          <table class="keys">
+            <tr><td>↑ ↓ / W S</td><td>Forward / back</td></tr>
+            <tr><td>← →</td><td>Turn</td></tr>
+            <tr><td>A D</td><td>Strafe</td></tr>
+            <tr><td>I K / PgUp PgDn</td><td>Look up / down</td></tr>
+            <tr><td>J / Enter</td><td>Fire</td></tr>
+            <tr><td>L / Right Shift</td><td>Aim down sights</td></tr>
+            <tr><td>Tab / E</td><td>Next weapon</td></tr>
+            <tr><td>Arrows + Enter</td><td>Navigate menus</td></tr>
+          </table>
+          <p class="hint">Aim assist helps keyboard and touch players line up shots.</p>
+        </div>
+        <div>
+          <h3>Touchscreen</h3>
+          <table class="keys">
+            <tr><td>Left thumb</td><td>Joystick — push past the ring to sprint</td></tr>
+            <tr><td>Right thumb</td><td>Drag to look</td></tr>
+            <tr><td>FIRE</td><td>Hold to shoot, drag to aim while firing</td></tr>
+            <tr><td>AIM</td><td>Toggle aim down sights</td></tr>
+            <tr><td>R · ROLL · BAT · SWAP</td><td>Reload · dodge · melee · weapon</td></tr>
+            <tr><td>II</td><td>Pause</td></tr>
+          </table>
+        </div>
+      </div>
       <p class="hint">Headshots deal double damage. Kill quickly to build a combo multiplier.</p>
       <button data-action="back">Back</button>
     </div>
@@ -157,6 +191,7 @@
       </div>
     </div>
   </div>
+  <div id="rotate-hint">Rotate your device to landscape</div>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

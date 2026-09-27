@@ -2,9 +2,9 @@
   "name": "night-shift",
   "version": "1.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --host",
     "assets": "node tools/build-assets.mjs"
   },
   "description": "Night Shift — a third-person action shooter in five levels, built with three.js from the game-assets packs.",

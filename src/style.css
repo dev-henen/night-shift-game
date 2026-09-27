@@ -138,3 +138,60 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 #exit-marker { position: absolute; transform: translate(-50%, -50%); color: #6cf; font-family: var(--display); font-size: 20px; letter-spacing: 2px; text-align: center; }
 #exit-marker em { display: block; font-style: normal; font-family: var(--mono); font-size: 12px; }
 #exit-marker::before { content: '◆'; display: block; font-size: 18px; animation: blink 0.6s infinite alternate; }
+
+/* ---------- touch controls ---------- */
+#touch { position: absolute; inset: 0; z-index: 6; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+#touch .zone { position: absolute; top: 0; bottom: 0; }
+#touch .zone.left { left: 0; width: 45%; }
+#touch .zone.right { right: 0; width: 55%; }
+#touch .stick { position: absolute; width: 0; height: 0; pointer-events: none; }
+#touch .ring { position: absolute; width: 124px; height: 124px; left: -62px; top: -62px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.35); background: rgba(0, 0, 0, 0.2); }
+#touch .knob { position: absolute; width: 56px; height: 56px; left: -28px; top: -28px; border-radius: 50%; background: rgba(255, 255, 255, 0.45); }
+#touch .stick.sprint .ring { border-color: var(--gold); }
+#touch .stick.sprint .knob { background: rgba(242, 193, 78, 0.7); }
+.tbtn {
+  position: absolute; border-radius: 50%; width: 62px; height: 62px; padding: 0; font-size: 16px; letter-spacing: 1px;
+  background: rgba(10, 10, 14, 0.45); border: 2px solid rgba(255, 255, 255, 0.35); color: rgba(255, 255, 255, 0.9);
+  touch-action: none; -webkit-tap-highlight-color: transparent;
+}
+.tbtn:hover:not(:disabled) { background: rgba(10, 10, 14, 0.45); border-color: rgba(255, 255, 255, 0.35); }
+.tbtn.on, .tbtn.active, .tbtn.on:hover, .tbtn.active:hover { background: rgba(224, 69, 58, 0.75); border-color: var(--accent); }
+.tbtn.fire { width: 92px; height: 92px; right: calc(28px + env(safe-area-inset-right)); bottom: 34px; font-size: 22px; border-color: rgba(224, 69, 58, 0.8); }
+.tbtn.aim { right: calc(132px + env(safe-area-inset-right)); bottom: 26px; }
+.tbtn.reload { right: calc(138px + env(safe-area-inset-right)); bottom: 100px; width: 50px; height: 50px; }
+.tbtn.roll { right: calc(46px + env(safe-area-inset-right)); bottom: 140px; }
+.tbtn.melee { right: calc(200px + env(safe-area-inset-right)); bottom: 60px; width: 54px; height: 54px; }
+.tbtn.swap { right: calc(112px + env(safe-area-inset-right)); bottom: 168px; width: 54px; height: 54px; font-size: 14px; }
+.tbtn.pause { top: 14px; left: 50%; margin-left: 170px; width: 42px; height: 42px; border-radius: 8px; font-size: 16px; }
+
+/* HUD rearranged so it stays clear of the thumbs */
+body.touch .hud-br { bottom: auto; top: 72px; }
+body.touch #ammo { font-size: 40px; }
+body.touch #reserve, body.touch #ammo .sep { font-size: 26px; }
+body.touch #roll-ready { display: none; }
+body.touch .hud-bl { bottom: auto; top: 76px; width: 200px; }
+body.touch #crosshair { transform: scale(1.1); }
+body:not(.touch) .only-touch, body.touch .only-desktop { display: none !important; }
+
+#rotate-hint { display: none; position: fixed; inset: 0; z-index: 50; background: #07080b; color: var(--fg); align-items: center; justify-content: center; text-align: center; font-family: var(--display); font-size: 32px; letter-spacing: 2px; padding: 24px; }
+@media (orientation: portrait) { body.touch.playing #rotate-hint { display: flex; } }
+
+/* Small / short screens (phones in landscape) */
+@media (max-height: 520px) {
+  .screen { gap: 10px; padding: 12px; }
+  .screen h2 { font-size: 38px; }
+  .brief h2 { font-size: 52px; }
+  .brief p { margin: 4px 0; font-size: 14px; }
+  button { font-size: 20px; padding: 6px 20px; }
+  .menu-buttons { gap: 6px; }
+  #level-name { font-size: 22px; }
+  #score { font-size: 28px; }
+  #wave { font-size: 22px; }
+  #center-msg h1 { font-size: 52px; }
+  .stats { font-size: 14px; min-width: 280px; }
+  .keys { font-size: 13px; }
+  .keys td { padding: 3px 10px; }
+  #settings label { width: min(420px, 90vw); }
+}
+.controls-cols { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+.controls-cols h3 { font-family: var(--display); font-weight: 400; letter-spacing: 2px; color: var(--accent); margin: 0 0 6px; font-size: 24px; }

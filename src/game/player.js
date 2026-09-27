@@ -146,7 +146,14 @@ export class Player {
     // Look
     const sens = 0.0022 * input.sensitivity * (this.zoom > 0.5 ? 0.6 : 1);
     this.camYaw -= input.mouse.dx * sens;
-    this.camPitch = THREE.MathUtils.clamp(this.camPitch - input.mouse.dy * sens, -1.1, 0.75);
+    this.camPitch -= input.mouse.dy * sens;
+    // Keyboard look (arrow keys turn, PageUp/PageDown or I/K tilt).
+    const kl = input.keyLook();
+    const turnRate = 2.6 * input.sensitivity * (this.zoom > 0.5 ? 0.5 : 1);
+    this.camYaw -= kl.x * turnRate * dt;
+    this.camPitch += kl.y * turnRate * 0.6 * dt;
+    if (input.lastLook !== 'mouse') this.aimAssist(dt, input.fireHeld() || input.aimHeld());
+    this.camPitch = THREE.MathUtils.clamp(this.camPitch, -1.1, 0.75);
 
     // Timers
     this.fireCooldown -= dt;
@@ -159,23 +166,24 @@ export class Player {
 
     // Weapon switching
     for (const id of this.owned) if (input.pressed(`Digit${WEAPONS[id].slot}`)) this.equip(id);
-    if (input.pressed('KeyQ') && this.lastWeapon) this.equip(this.lastWeapon);
-    if (input.mouse.wheel) {
+    if (input.actionPressed('lastWeapon') && this.lastWeapon) this.equip(this.lastWeapon);
+    const cycle = input.mouse.wheel || (input.actionPressed('nextWeapon') ? 1 : 0);
+    if (cycle) {
       const i = this.owned.indexOf(this.current);
-      this.equip(this.owned[(i + input.mouse.wheel + this.owned.length) % this.owned.length]);
+      this.equip(this.owned[(i + cycle + this.owned.length) % this.owned.length]);
     }
 
     // Movement
-    const ax = input.axis();
+    const ax = input.moveAxis();
     const fwd = _v.set(Math.sin(this.camYaw), 0, Math.cos(this.camYaw));
     const right = _v2.set(-Math.cos(this.camYaw), 0, Math.sin(this.camYaw));
     const wish = new THREE.Vector3().addScaledVector(fwd, ax.z).addScaledVector(right, ax.x);
     if (wish.lengthSq() > 1) wish.normalize();
-    const aiming = input.mouse.right && this.rollT <= 0;
-    const sprinting = input.down('ShiftLeft') && ax.z > 0 && !aiming && this.meleeT < 0;
+    const aiming = input.aimHeld() && this.rollT <= 0;
+    const sprinting = input.sprintHeld() && ax.z > 0.3 && !aiming && this.meleeT < 0;
     this.zoom = THREE.MathUtils.damp(this.zoom, aiming ? 1 : 0, 12, dt);
 
-    if (input.pressed('Space') && this.rollCooldown <= 0 && this.rollT <= 0) {
+    if (input.actionPressed('roll') && this.rollCooldown <= 0 && this.rollT <= 0) {
       this.rollT = ROLL_TIME;
       this.rollCooldown = 0.85;
       this.rollDir.copy(wish.lengthSq() > 0.01 ? wish : fwd.clone().negate()).normalize();
@@ -222,7 +230,7 @@ export class Player {
     // Actions
     const w = this.weapon;
     const ammo = this.ammo[this.current];
-    if ((input.pressed('KeyF') || input.pressed('KeyV')) && this.meleeCooldown <= 0 && this.rollT <= 0) {
+    if (input.actionPressed('melee') && this.meleeCooldown <= 0 && this.rollT <= 0) {
       this.meleeT = 0;
       this.meleeHit = false;
       this.meleeCooldown = MELEE.cooldown;
@@ -248,15 +256,15 @@ export class Player {
         if (ammo.reserve !== Infinity) ammo.reserve -= take;
         this.game.audio.play('reloadDone');
       }
-    } else if (input.pressed('KeyR') && ammo.mag < w.mag && ammo.reserve > 0 && !busy) {
+    } else if (input.actionPressed('reload') && ammo.mag < w.mag && ammo.reserve > 0 && !busy) {
       this.startReload();
     }
 
-    const trigger = w.auto ? input.mouse.left : input.mouse.leftPressed;
+    const trigger = w.auto ? input.fireHeld() : input.firePressed();
     if (trigger && !busy && this.reloadT <= 0 && this.fireCooldown <= 0) {
       if (ammo.mag > 0) this.fire(w, ammo);
       else if (ammo.reserve > 0) this.startReload();
-      else if (input.mouse.leftPressed) this.game.audio.play('empty');
+      else if (input.firePressed()) this.game.audio.play('empty');
     }
     // Auto-switch away from a fully empty weapon.
     if (ammo.mag === 0 && ammo.reserve === 0 && this.reloadT <= 0 && this.fireCooldown < -0.4) this.equip('pistol');
@@ -285,6 +293,36 @@ export class Player {
     });
     this.body.rotation.x = 0;
     this.placeHeldItems(aimPitch);
+  }
+
+  /**
+   * Aim assist for keyboard and touch players: gently pulls the camera onto the nearest visible
+   * enemy close to the crosshair (pitch always, yaw only while firing/aiming).
+   */
+  aimAssist(dt, engaged) {
+    const { game } = this;
+    const cam = game.camera.position;
+    let best = null;
+    let bestScore = Infinity;
+    for (const e of game.enemies) {
+      if (!e.alive || e.state === 'spawn') continue;
+      const tx = e.pos.x - cam.x;
+      const tz = e.pos.z - cam.z;
+      const dist = Math.hypot(tx, tz);
+      if (dist > 35) continue;
+      let dy = Math.atan2(tx, tz) - this.camYaw;
+      dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+      const cone = 0.12 + 1.2 / Math.max(dist, 1); // wider when close
+      if (Math.abs(dy) > cone) continue;
+      if (!e.los) continue;
+      const score = Math.abs(dy) * 10 + dist * 0.05;
+      if (score < bestScore) { bestScore = score; best = { e, dy, dist }; }
+    }
+    if (!best) return;
+    const { e, dy, dist } = best;
+    const pitch = Math.atan2(e.pos.y + e.height * 0.7 - cam.y, dist);
+    this.camPitch += (pitch - this.camPitch) * (1 - Math.exp(-dt * 6));
+    if (engaged) this.camYaw += dy * (1 - Math.exp(-dt * 5));
   }
 
   startReload() {

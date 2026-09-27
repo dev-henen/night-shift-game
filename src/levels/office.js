@@ -161,7 +161,7 @@ export default {
       { x: -2, z: -10 }, { x: 14, z: -4 }, { x: -7, z: -5 }, { x: 0, z: -5 },
     ];
     return {
-      playerStart: { x: -12, z: -6, yaw: Math.PI / 2 },
+      playerStart: { x: -14, z: -4.5, yaw: Math.PI / 2 }, // in the aisle between the desk rows
       spawns,
       exit: { x: W - 1.5, z: -1 },
       pickups: [
